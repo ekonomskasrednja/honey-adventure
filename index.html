@@ -97,7 +97,7 @@ let today = new Date().toDateString();
 function startLevel(level) {
   // Ako je već skupljeno danas
   if(lastDate === today){
-    message.innerText = "🎉 You collected your honey today! Come back tomorrow for the next level!";
+    message.innerText = " You collected your honey today! Come back tomorrow for the next level!";
     message.style.display = "block";
     honey.style.display = "none";
     flowers.forEach(f => f.remove());
@@ -135,7 +135,7 @@ function showHoney() {
 
 honey.addEventListener('click', () => {
   if(currentLevel < 7){
-    message.innerText = "🎉 Congratulations! You collected the honey. Take your spoon of honey and come back tomorrow for the next level!";
+    message.innerText = " Congratulations! You collected the honey. Take your spoon of honey and come back tomorrow for the next level!";
     speak(message.innerText);
     message.style.display = "block";
     localStorage.setItem('honeyLevel', currentLevel+1);
@@ -169,5 +169,6 @@ startLevel(currentLevel);
 
 </body>
 </html>
+
 
 
