@@ -2,144 +2,52 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Honey Adventure - 7-day mobile</title>
+<title>Honey Adventure - Mobile Touch</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {
-  margin:0; padding:0;
-  font-family: Arial, sans-serif;
-  text-align:center;
-  background:#c8e6c9;
-}
-
-h1 {
-  color:#ff9800;
-  font-size:5vw;
-  margin:10px 0;
-}
-
-#levelIndicator {
-  font-size:4vw;
-  margin-bottom:5px;
-  font-weight:bold;
-}
-
-#gameArea {
-  width:90vw;
-  height:60vw;
-  max-width:600px;
-  max-height:400px;
-  margin:10px auto;
-  position:relative;
-  background: linear-gradient(to top, #a5d6a7 60%, #81d4fa 40%);
-  border:3px solid #4caf50;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-.bee {
-  width:10%;
-  aspect-ratio:1/1;
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:url('https://i.postimg.cc/W3gspNsm/pcela.png') no-repeat center/contain;
-}
-
-.flower {
-  width:7%;
-  aspect-ratio:1/1;
-  position:absolute;
-  background-size:contain;
-  background-repeat:no-repeat;
-  cursor:pointer;
-}
-
-#reward {
-  width:15%;
-  aspect-ratio:1/1;
-  position:absolute;
-  bottom:5%;
-  left:50%;
-  transform:translateX(-50%);
-  display:none;
-  background:url('https://i.postimg.cc/2SSjdNxm/med.png') no-repeat center/contain;
-}
-
-#message {
-  font-size:5vw;
-  font-weight:bold;
-  color:#2e7d32;
-  margin-top:10px;
-  display:none;
-}
-
-#controls {
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin-top:15px;
-}
-
-#controls button {
-  width:60px; height:60px;
-  margin:5px;
-  font-size:24px;
-  border-radius:10px;
-  border:none;
-  background:#ff9800;
-  color:white;
-  font-weight:bold;
-}
+body { margin:0; padding:0; font-family:Arial,sans-serif; text-align:center; background:#c8e6c9; }
+h1 { color:#ff9800; font-size:5vw; margin:10px 0; }
+#levelIndicator { font-size:4vw; margin-bottom:5px; font-weight:bold; }
+#gameArea { width:90vw; height:60vw; max-width:600px; max-height:400px; margin:10px auto; position:relative; background:#81d4fa; border:3px solid #4caf50; border-radius:10px; overflow:hidden; }
+.bee { width:12%; aspect-ratio:1/1; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:url('https://i.postimg.cc/W3gspNsm/pcela.png') no-repeat center/contain; }
+.flower { width:12%; aspect-ratio:1/1; position:absolute; background-size:contain; background-repeat:no-repeat; }
+#reward { width:20%; aspect-ratio:1/1; position:absolute; bottom:5%; left:50%; transform:translateX(-50%); display:none; background:url('https://i.postimg.cc/2SSjdNxm/med.png') no-repeat center/contain; }
+#message { font-size:5vw; font-weight:bold; color:#2e7d32; margin-top:10px; display:none; }
 </style>
 </head>
 <body>
 
 <h1>Honey Adventure 🌸</h1>
 <div id="levelIndicator"></div>
-<p>Tap arrows or tap flowers to collect them!</p>
-
 <div id="gameArea">
   <div class="bee" id="bee"></div>
+  <div id="reward"></div>
 </div>
-
-<div id="reward"></div>
 <div id="message"></div>
-
-<div id="controls">
-  <button onclick="moveBee('up')">↑</button>
-  <button onclick="moveBee('left')">←</button>
-  <button onclick="moveBee('down')">↓</button>
-  <button onclick="moveBee('right')">→</button>
-</div>
 
 <script>
 const bee = document.getElementById('bee');
 const gameArea = document.getElementById('gameArea');
-const message = document.getElementById('message');
 const reward = document.getElementById('reward');
+const message = document.getElementById('message');
 const levelIndicator = document.getElementById('levelIndicator');
 
-let beeX = 50;
-let beeY = 50;
-
-// Flowers for the game
-const flowerImages = [
-  'https://i.postimg.cc/HLxKdXGD/oblak.png',
+let flowerImages = [
   'https://i.postimg.cc/YqkC9WGv/ljubic-ruza.png',
   'https://i.postimg.cc/Hn1sbJ6P/cvet-rozi.png',
   'https://i.postimg.cc/k4ftcvth/crvena-ruza.png'
 ];
 
 let flowers = [];
+let beeX = gameArea.clientWidth / 2;
+let beeY = gameArea.clientHeight / 2;
+let targetX = beeX;
+let targetY = beeY;
 
-// LocalStorage for level and date
 let today = new Date().toDateString();
 let savedDate = localStorage.getItem('lastPlayDate');
 let savedLevel = parseInt(localStorage.getItem('lastLevel')) || 1;
 
-// Increase level if new day
 if(savedDate !== today && savedLevel < 7){
   savedLevel += 1;
   localStorage.setItem('lastLevel', savedLevel);
@@ -147,11 +55,9 @@ if(savedDate !== today && savedLevel < 7){
 }
 
 let currentLevel = savedLevel;
-
-// Show level
 levelIndicator.innerText = "Level " + currentLevel + " / 7";
 
-// If already played today
+// Ako je vec odigrano danas
 if(savedDate === today){
   message.innerText = "Congratulations! Take your honey spoon and come back tomorrow!";
   message.style.display = 'block';
@@ -160,13 +66,7 @@ if(savedDate === today){
   startLevel();
 }
 
-function updateBeePosition(){
-  const areaWidth = gameArea.offsetWidth;
-  const areaHeight = gameArea.offsetHeight;
-  bee.style.left = (beeX/100*areaWidth)+"px";
-  bee.style.top = (beeY/100*areaHeight)+"px";
-}
-
+// Dodavanje cveća
 function startLevel(){
   flowers.forEach(f=>f.remove());
   flowers = [];
@@ -175,67 +75,39 @@ function startLevel(){
     const flower = document.createElement('div');
     flower.classList.add('flower');
     flower.style.backgroundImage = `url(${img})`;
-    flower.style.top = Math.random()*90+"%";
-    flower.style.left = Math.random()*90+"%";
+    flower.style.top = Math.random()*80+"%";
+    flower.style.left = Math.random()*80+"%";
     gameArea.appendChild(flower);
     flowers.push(flower);
-    
-    // Click to collect flower
-    flower.addEventListener('click', ()=>{
-      flower.remove();
-      flowers = flowers.filter(f => f !== flower);
-      checkCollision();
-    });
   });
-  
-  beeX = 50;
-  beeY = 50;
-  updateBeePosition();
-  reward.style.display = 'none';
-  message.style.display = 'none';
 }
 
-function moveBee(direction){
-  if(direction==='up' && beeY>0) beeY-=5;
-  if(direction==='down' && beeY<100) beeY+=5;
-  if(direction==='left' && beeX>0) beeX-=5;
-  if(direction==='right' && beeX<100) beeX+=5;
-  updateBeePosition();
-  checkCollision();
-}
-
+// Provera da li pčela dodiruje cvet
 function checkCollision(){
-  const bRect = bee.getBoundingClientRect();
-  flowers = flowers.filter(flower=>{
+  const beeRect = bee.getBoundingClientRect();
+  flowers = flowers.filter(flower => {
     const fRect = flower.getBoundingClientRect();
-    if(!(bRect.right<fRect.left || bRect.left>fRect.right ||
-         bRect.bottom<fRect.top || bRect.top>fRect.bottom)){
+    if(!(beeRect.right < fRect.left || beeRect.left > fRect.right || beeRect.bottom < fRect.top || beeRect.top > fRect.bottom)){
       flower.remove();
       return false;
     }
     return true;
   });
-  
-  if(flowers.length===0){
+  if(flowers.length === 0){
     reward.style.display = 'block';
     message.innerText = "Congratulations! Take your honey spoon and come back tomorrow!";
     message.style.display = 'block';
-    speakMessage(message.innerText);
     localStorage.setItem('lastPlayDate', today);
+    speakMessage(message.innerText);
   }
 }
 
-// Function to speak the message
-function speakMessage(text){
-  if('speechSynthesis' in window){
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'en-US';
-    window.speechSynthesis.speak(utter);
-  }
-}
-</script>
+// Kretanje pčele
+function moveBee(){
+  let dx = targetX - beeX;
+  let dy = targetY - beeY;
+  beeX += dx * 0.05;
+  beeY += dy
 
-</body>
-</html>
 
 
