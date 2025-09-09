@@ -81,85 +81,90 @@
 <div id="message"></div>
 
 <script>
-  const bee = document.getElementById('bee');
-  const gameArea = document.getElementById('gameArea');
-  const honey = document.getElementById('honey');
-  const message = document.getElementById('message');
+const bee = document.getElementById('bee');
+const gameArea = document.getElementById('gameArea');
+const honey = document.getElementById('honey');
+const message = document.getElementById('message');
 
-  const flowerImages = [
-    'crvena-ruza.png',
-    'cvet-rozi.png',
-    'ljubic-ruza.png'
-  ];
+const flowerImages = ['crvena-ruza.png', 'cvet-rozi.png', 'ljubic-ruza.png'];
+let flowers = [];
+let beeX = 280, beeY = 180;
 
-  let flowers = [];
-  let beeX = 280;
-  let beeY = 180;
-  let currentLevel = parseInt(localStorage.getItem('honeyLevel') || '1');
+let currentLevel = parseInt(localStorage.getItem('honeyLevel') || '1');
+let lastDate = localStorage.getItem('honeyDate');
+let today = new Date().toDateString();
 
-  function startLevel(level) {
+function startLevel(level) {
+  // Ako je već skupljeno danas
+  if(lastDate === today){
+    message.innerText = "🎉 You collected your honey today! Come back tomorrow for the next level!";
+    message.style.display = "block";
+    honey.style.display = "none";
     flowers.forEach(f => f.remove());
-    flowers = [];
-    honey.style.display = "none";
-
-    for (let i = 0; i < level + 2; i++) {
-      let flower = document.createElement('img');
-      flower.src = flowerImages[i % flowerImages.length];
-      flower.classList.add('flower');
-      flower.style.top = Math.random() * 320 + "px";
-      flower.style.left = Math.random() * 560 + "px";
-      flower.addEventListener('click', () => {
-        flower.remove();
-        flowers = flowers.filter(f => f !== flower);
-        if (flowers.length === 0) {
-          showHoney();
-        }
-      });
-      gameArea.appendChild(flower);
-      flowers.push(flower);
-    }
-
-    message.style.display = "none";
+    return;
   }
 
-  function showHoney() {
-    honey.style.top = "170px";
-    honey.style.left = "275px";
-    honey.style.display = "block";
+  flowers.forEach(f => f.remove());
+  flowers = [];
+  honey.style.display = "none";
+
+  // dodaj cvetove
+  for (let i = 0; i < Math.min(level + 2, flowerImages.length); i++) {
+    let flower = document.createElement('img');
+    flower.src = flowerImages[i % flowerImages.length];
+    flower.className = 'flower';
+    flower.style.top = Math.random() * 320 + "px";
+    flower.style.left = Math.random() * 560 + "px";
+    flower.addEventListener('click', () => {
+      flower.remove();
+      flowers = flowers.filter(f => f !== flower);
+      if (flowers.length === 0) showHoney();
+    });
+    gameArea.appendChild(flower);
+    flowers.push(flower);
   }
 
-  honey.addEventListener('click', () => {
-    if (currentLevel < 7) {
-      message.innerText = "🎉 Congratulations! You collected the honey. Take your spoon of honey and come back tomorrow for the next level!";
-      speak(message.innerText);
-      message.style.display = "block";
-      currentLevel++;
-      localStorage.setItem('honeyLevel', currentLevel);
-    } else {
-      message.innerText = "🏆 Congratulations, you are the Master Honey Collector! Take your spoon of honey and come back next week!";
-      speak(message.innerText);
-      message.style.display = "block";
-      localStorage.setItem('honeyLevel', 1);
-    }
-    honey.style.display = "none";
-  });
+  message.style.display = "none";
+}
 
-  function speak(text) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    speechSynthesis.speak(utterance);
+function showHoney() {
+  honey.style.top = "170px";
+  honey.style.left = "275px";
+  honey.style.display = "block";
+}
+
+honey.addEventListener('click', () => {
+  if(currentLevel < 7){
+    message.innerText = "🎉 Congratulations! You collected the honey. Take your spoon of honey and come back tomorrow for the next level!";
+    speak(message.innerText);
+    message.style.display = "block";
+    localStorage.setItem('honeyLevel', currentLevel+1);
+  } else {
+    message.innerText = "🏆 Congratulations, you are a Master Honey Collector! Take your spoon of honey and come back next week!";
+    speak(message.innerText);
+    message.style.display = "block";
+    localStorage.setItem('honeyLevel', 1);
   }
+  localStorage.setItem('honeyDate', today);
+  honey.style.display = "none";
+});
 
-  document.addEventListener('keydown', e => {
-    if (e.key === "ArrowUp" && beeY > 0) beeY -= 10;
-    if (e.key === "ArrowDown" && beeY < 360) beeY += 10;
-    if (e.key === "ArrowLeft" && beeX > 0) beeX -= 10;
-    if (e.key === "ArrowRight" && beeX < 560) beeX += 10;
-    bee.style.top = beeY + "px";
-    bee.style.left = beeX + "px";
-  });
+function speak(text){
+  let msg = new SpeechSynthesisUtterance(text);
+  msg.lang = 'en-US';
+  window.speechSynthesis.speak(msg);
+}
 
-  startLevel(currentLevel);
+document.addEventListener('keydown', e => {
+  if(e.key === "ArrowUp" && beeY > 0) beeY -= 10;
+  if(e.key === "ArrowDown" && beeY < 360) beeY += 10;
+  if(e.key === "ArrowLeft" && beeX > 0) beeX -= 10;
+  if(e.key === "ArrowRight" && beeX < 560) beeX += 10;
+  bee.style.top = beeY + "px";
+  bee.style.left = beeX + "px";
+});
+
+startLevel(currentLevel);
 </script>
 
 </body>
