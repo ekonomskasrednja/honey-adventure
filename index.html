@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Honey Adventure - 7-day mobile</title>
@@ -53,6 +53,7 @@ h1 {
   position:absolute;
   background-size:contain;
   background-repeat:no-repeat;
+  cursor:pointer;
 }
 
 #reward {
@@ -97,7 +98,7 @@ h1 {
 
 <h1>Honey Adventure 🌸</h1>
 <div id="levelIndicator"></div>
-<p>Tap arrows to move the bee and collect all flowers!</p>
+<p>Tap arrows or tap flowers to collect them!</p>
 
 <div id="gameArea">
   <div class="bee" id="bee"></div>
@@ -123,7 +124,7 @@ const levelIndicator = document.getElementById('levelIndicator');
 let beeX = 50;
 let beeY = 50;
 
-// Flowers za svaki nivo
+// Flowers for the game
 const flowerImages = [
   'https://i.postimg.cc/HLxKdXGD/oblak.png',
   'https://i.postimg.cc/YqkC9WGv/ljubic-ruza.png',
@@ -133,12 +134,12 @@ const flowerImages = [
 
 let flowers = [];
 
-// LocalStorage za nivo
+// LocalStorage for level and date
 let today = new Date().toDateString();
 let savedDate = localStorage.getItem('lastPlayDate');
 let savedLevel = parseInt(localStorage.getItem('lastLevel')) || 1;
 
-// Ako je novi dan i nivo manji od 7, povecaj nivo
+// Increase level if new day
 if(savedDate !== today && savedLevel < 7){
   savedLevel += 1;
   localStorage.setItem('lastLevel', savedLevel);
@@ -147,13 +148,14 @@ if(savedDate !== today && savedLevel < 7){
 
 let currentLevel = savedLevel;
 
-// Prikaz nivoa
+// Show level
 levelIndicator.innerText = "Level " + currentLevel + " / 7";
 
-// Ako je vec igrano danas, prikazi poruku i ne dozvoljavaj igranje
+// If already played today
 if(savedDate === today){
   message.innerText = "Congratulations! Take your honey spoon and come back tomorrow!";
   message.style.display = 'block';
+  speakMessage(message.innerText);
 } else {
   startLevel();
 }
@@ -177,6 +179,13 @@ function startLevel(){
     flower.style.left = Math.random()*90+"%";
     gameArea.appendChild(flower);
     flowers.push(flower);
+    
+    // Click to collect flower
+    flower.addEventListener('click', ()=>{
+      flower.remove();
+      flowers = flowers.filter(f => f !== flower);
+      checkCollision();
+    });
   });
   
   beeX = 50;
@@ -211,7 +220,17 @@ function checkCollision(){
     reward.style.display = 'block';
     message.innerText = "Congratulations! Take your honey spoon and come back tomorrow!";
     message.style.display = 'block';
+    speakMessage(message.innerText);
     localStorage.setItem('lastPlayDate', today);
+  }
+}
+
+// Function to speak the message
+function speakMessage(text){
+  if('speechSynthesis' in window){
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    window.speechSynthesis.speak(utter);
   }
 }
 </script>
